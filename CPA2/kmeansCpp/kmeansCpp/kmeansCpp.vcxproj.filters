@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="driver.cpp" />
+    <ClCompile Include="DataCluster.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DataCluster.h" />
+    <ClInclude Include="DataNode.h" />
+  </ItemGroup>
+</Project>
