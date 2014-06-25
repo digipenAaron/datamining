@@ -1,0 +1,8 @@
+/CPA2/kmeansCpp/Debug/*.ilk
+*.pdb
+/CPA2/kmeansCpp/kmeansCpp/Debug
+/
+Debug
+*.opensdf
+*.sdf
+/*.gitattributes
