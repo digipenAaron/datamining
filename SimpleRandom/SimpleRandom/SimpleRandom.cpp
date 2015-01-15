@@ -1,7 +1,6 @@
 // SimpleRandom.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -12,8 +11,38 @@
 const int TOTAL_NUM = 316;
 const int SAMPLE_NUM = 20;
 
-std::vector < std::vector<int>> dataSet;
-std::vector < std::vector<int>> samples;
+ class DataType
+{
+public:
+	virtual void print(){}
+	virtual void read(std::ifstream&){}
+	virtual ~DataType(){}
+};
+
+ class Data1 : public DataType
+ {
+ public:
+	 Data1() :dataItem(std::vector<int>(12)){}
+	 virtual void print()
+	 {
+		 int dataNum = dataItem.size();
+		 for (int j = 0; j < dataNum; j++)
+			 std::cout << std::setw(5) << dataItem[j];
+		 std::cout << std::endl;
+
+	 }
+	 virtual void read(std::ifstream& dataFile)
+	 {
+		 for (int i = 0; i < 12; i++)
+			 dataFile >> dataItem[i];
+	 }
+	 virtual ~Data1(){}
+
+	 std::vector<int> dataItem;
+ };
+
+ std::vector < DataType*> dataSet;
+ std::vector < DataType*> samples;
 
 bool readFile(const char* filename)
 {
@@ -28,16 +57,24 @@ bool readFile(const char* filename)
 		std::getline(dataFile, s);
 
 	
-	for (int iline = 0; iline < 316; iline++)
+	for (int iline = 0; iline < TOTAL_NUM; iline++)
 	{
-		std::vector<int> dataItem(12);
-		for (int i = 0; i < 12; i++)
-			dataFile >> dataItem[i];
+		Data1* dataItem = new Data1();
+		dataItem->read(dataFile);
 		dataSet.push_back(dataItem);
 	}
 	return true;
 }
-void SimpleTandomSampling()
+
+void cleanup()
+{
+	for (int iline = 0; iline < TOTAL_NUM; iline++)
+	{
+		delete dataSet[iline];
+	}
+}
+
+void SimpleRandomSampling()
 {
 	std::vector<int> numList;
 
@@ -66,12 +103,12 @@ void SimpleTandomSampling()
 	}
 }
 
-int getMode(std::vector<int>& nums)
+float getMode(std::vector<float>& nums)
 {
-	int result = 0;
-	int freq = 0;
-	int maxFreq = 0;
-	int last = nums[0];
+	float result = 0;
+	float freq = 0;
+	float maxFreq = 0;
+	float last = nums[0];
 	for (int i = 0; i < nums.size(); i++)
 	{
 		if (nums[i] == last)
@@ -90,7 +127,7 @@ int getMode(std::vector<int>& nums)
 	return result;
 }
 
-float getMean(std::vector<int>& nums)
+float getMean(std::vector<float>& nums)
 {
 	float result = 0;
 	float sum=0;
@@ -100,7 +137,7 @@ float getMean(std::vector<int>& nums)
 	return result;
 }
 
-float getMedian(std::vector<int>& nums)
+float getMedian(std::vector<float>& nums)
 {
 	float result = 0;
 	if (nums.size() % 2 == 1)
@@ -114,14 +151,11 @@ float getMedian(std::vector<int>& nums)
 
 void printResult()
 {
-	int dataNum = dataSet[0].size();
 	std::cout << "===============Samples================";
 	std::cout << std::endl;
 	for (int i = 0; i < SAMPLE_NUM; i++)
 	{
-		for (int j = 0; j < dataNum; j++)
-			std::cout << std::setw(5) << samples[i][j];
-		std::cout << std::endl;
+		samples[i]->print();
 	}
 	std::vector<int> modes;
 	std::vector<float> means;
@@ -130,11 +164,14 @@ void printResult()
 
 	std::cout <<"=================Result==================";
 
-	for (int k = 0; k <dataNum; k++)
+	for (int k = 0; k <12; k++)
 	{
-		std::vector<int> data;
+		std::vector<float> data;
 		for (int i = 0; i < SAMPLE_NUM; ++i)
-			data.push_back(samples[i][k]);
+		{
+			Data1* data1 = dynamic_cast<Data1*>(samples[i]);
+			data.push_back(data1->dataItem[k]);
+		}
 		std::sort(data.begin(), data.end());
 		int mode = getMode(data);
 		modes.push_back(mode);
@@ -145,27 +182,28 @@ void printResult()
 	}
 	std::cout << std::endl;
 	std::cout << std::setw(5) << "mode";
-	for (int j = 1; j < dataNum; j++)
+	for (int j = 1; j < 12; j++)
 		std::cout << std::setw(5) << modes[j];
 	std::cout << std::endl;
 
 	std::cout << std::setw(5) << "mean";
-	for (int j = 1; j < dataNum; j++)
+	for (int j = 1; j < 12; j++)
 		std::cout << std::setw(8) << means[j];
 	std::cout << std::endl;
 
 	std::cout << std::setw(5) << "median";
-	for (int j = 1; j < dataNum; j++)
+	for (int j = 1; j < 12; j++)
 		std::cout << std::setw(8) << medians[j];
 	std::cout << std::endl;
 
 }
-int _tmain(int argc, _TCHAR* argv[])
+int main()
 {
 	srand(time(NULL));
 	readFile("Nudge.txt");
-	SimpleTandomSampling();
+	SimpleRandomSampling();
 	printResult();
+	cleanup();
 	getchar();
 	return 0;
 }
