@@ -74,6 +74,21 @@ void cleanup()
 	}
 }
 
+void ReservoirSampling()
+{
+	samples.resize(SAMPLE_NUM);
+	int i; 
+	for (i = 0; i < SAMPLE_NUM; i++)
+		samples[i] = dataSet[i];
+
+	for (; i < TOTAL_NUM; i++)
+	{
+		int j = rand() % (i + 1);
+		if (j < SAMPLE_NUM)
+			samples[j] = dataSet[i];
+	}
+}
+
 void SimpleRandomSampling()
 {
 	std::vector<int> numList;
@@ -201,7 +216,7 @@ int main()
 {
 	srand(time(NULL));
 	readFile("Nudge.txt");
-	SimpleRandomSampling();
+	ReservoirSampling();
 	printResult();
 	cleanup();
 	getchar();
