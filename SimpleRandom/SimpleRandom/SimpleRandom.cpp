@@ -8,8 +8,8 @@
 #include <vector>
 #include <algorithm> 
 #include <time.h>
-const int TOTAL_NUM = 316;
-const int SAMPLE_NUM = 20;
+int TOTAL_NUM = 316;
+int SAMPLE_NUM = 20;
 
  class DataType
 {
@@ -41,10 +41,25 @@ public:
 	 std::vector<int> dataItem;
  };
 
+ class Data2 : public DataType
+ {
+ public:
+	 virtual void print()
+	 {
+		 std::cout << item << std::endl;
+	 }
+	 virtual void read(std::ifstream& dataFile)
+	 {
+		 std::getline(dataFile, item);
+	 }
+	 virtual ~Data2(){}
+	 std::string item;
+ };
+
  std::vector < DataType*> dataSet;
  std::vector < DataType*> samples;
 
-bool readFile(const char* filename)
+bool readFile1(const char* filename)
 {
 	const int MAX_LINE_SIZE = 255;
 	std::ifstream dataFile(filename, std::ifstream::in);
@@ -66,6 +81,26 @@ bool readFile(const char* filename)
 	return true;
 }
 
+bool readFile2(const char* filename)
+{
+	std::ifstream dataFile(filename, std::ifstream::in);
+	if (dataFile.bad())
+		return false;
+
+	std::string s;
+	std::getline(dataFile, s);
+
+	TOTAL_NUM = 0;
+	while (!dataFile.eof())
+	{
+		Data2* dataItem = new Data2();
+		dataItem->read(dataFile);
+		dataSet.push_back(dataItem);
+		TOTAL_NUM++;
+	}
+	return true;
+}
+
 void cleanup()
 {
 	for (int iline = 0; iline < TOTAL_NUM; iline++)
@@ -74,8 +109,9 @@ void cleanup()
 	}
 }
 
-void ReservoirSampling()
+void ReservoirSampling(int sampleNum)
 {
+	SAMPLE_NUM = sampleNum;
 	samples.resize(SAMPLE_NUM);
 	int i; 
 	for (i = 0; i < SAMPLE_NUM; i++)
@@ -164,7 +200,7 @@ float getMedian(std::vector<float>& nums)
 	return result;
 }
 
-void printResult()
+void printResult1()
 {
 	std::cout << "===============Samples================";
 	std::cout << std::endl;
@@ -212,14 +248,46 @@ void printResult()
 	std::cout << std::endl;
 
 }
-int main()
+
+void printResult2()
+{
+	std::cout << "===============Samples================";
+	std::cout << std::endl;
+	for (int i = 0; i < SAMPLE_NUM; i++)
+	{
+		samples[i]->print();
+	}
+	std::cout << std::endl;
+}
+
+void question2()
+{
+	readFile2("Current_Employee_Names__Salaries__and_Position_Titles.csv");
+	ReservoirSampling(20);
+	printResult2();
+}
+
+void question1()
+{
+	readFile1("Nudge.txt");
+	ReservoirSampling(20);
+	printResult1();
+}
+
+
+int main(int argc, char *argv[])
 {
 	srand(time(NULL));
-	readFile("Nudge.txt");
-	ReservoirSampling();
-	printResult();
+	if (argc != 2)
+		 return 1;
+	int num = atoi(argv[1]);
+	if (num == 0)
+		question1();
+	else if (num == 1)
+		question2();
+
 	cleanup();
-	getchar();
+
 	return 0;
 }
 
